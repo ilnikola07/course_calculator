@@ -1,0 +1,50 @@
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.exe
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.deps.json
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.runtimeconfig.json
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.dll
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.pdb
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\course_calculator.Form1.resources
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.csproj.GenerateResource.cache
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.AssemblyInfoInputs.cache
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.AssemblyInfo.cs
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.csproj.CoreCompileInputs.cache
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.dll
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\refint\Course_calculator.dll
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.pdb
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.genruntimeconfig.cache
+C:\Users\111\Desktop\1 курс\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\ref\Course_calculator.dll
+J:\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.exe
+J:\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.deps.json
+J:\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.runtimeconfig.json
+J:\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.dll
+J:\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.pdb
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.csproj.GenerateResource.cache
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.GeneratedMSBuildEditorConfig.editorconfig
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.AssemblyInfoInputs.cache
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.AssemblyInfo.cs
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.csproj.CoreCompileInputs.cache
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.dll
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\refint\Course_calculator.dll
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.pdb
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.genruntimeconfig.cache
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\ref\Course_calculator.dll
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.csproj.GenerateResource.cache
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.GeneratedMSBuildEditorConfig.editorconfig
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.AssemblyInfoInputs.cache
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.AssemblyInfo.cs
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.csproj.CoreCompileInputs.cache
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.dll
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\refint\Course_calculator.dll
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.pdb
+E:\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.exe
+E:\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.deps.json
+E:\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.runtimeconfig.json
+E:\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.dll
+E:\term2\alg_course\course\course_calculator\bin\Debug\net8.0-windows\Course_calculator.pdb
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\course_calculator.Form1.resources
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.genruntimeconfig.cache
+E:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\ref\Course_calculator.dll
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.FormAbout.resources
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\course_calculator.MainForm.resources
+J:\term2\alg_course\course\course_calculator\obj\Debug\net8.0-windows\Course_calculator.FormHistory.resources
