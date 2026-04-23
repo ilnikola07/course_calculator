@@ -65,11 +65,11 @@
             panelElse = new Panel();
             btnExit = new Button();
             dataGridViewPer = new DataGridView();
+            colName = new DataGridViewTextBoxColumn();
+            colValue = new DataGridViewTextBoxColumn();
             btnRef = new Button();
             btnHistory = new Button();
             labelBtn = new Label();
-            colName = new DataGridViewTextBoxColumn();
-            colValue = new DataGridViewTextBoxColumn();
             panelKeypad.SuspendLayout();
             panelFun.SuspendLayout();
             panelElse.SuspendLayout();
@@ -458,6 +458,7 @@
             btnExit.TabIndex = 14;
             btnExit.Text = "Выход";
             btnExit.UseVisualStyleBackColor = true;
+            btnExit.Click += btnExit_Click;
             // 
             // dataGridViewPer
             // 
@@ -470,6 +471,22 @@
             dataGridViewPer.RowHeadersVisible = false;
             dataGridViewPer.Size = new Size(172, 80);
             dataGridViewPer.TabIndex = 14;
+            dataGridViewPer.CellValidating += dataGridViewPer_CellValidating;
+            // 
+            // colName
+            // 
+            colName.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            colName.FillWeight = 80F;
+            colName.HeaderText = "Переменная";
+            colName.Name = "colName";
+            colName.Width = 101;
+            // 
+            // colValue
+            // 
+            colValue.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            colValue.FillWeight = 70F;
+            colValue.HeaderText = "Значение";
+            colValue.Name = "colValue";
             // 
             // btnRef
             // 
@@ -500,21 +517,6 @@
             labelBtn.Size = new Size(172, 21);
             labelBtn.TabIndex = 11;
             labelBtn.Text = "Другие возможности";
-            // 
-            // colName
-            // 
-            colName.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-            colName.FillWeight = 80F;
-            colName.HeaderText = "Переменная";
-            colName.Name = "colName";
-            colName.Width = 101;
-            // 
-            // colValue
-            // 
-            colValue.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            colValue.FillWeight = 70F;
-            colValue.HeaderText = "Значение";
-            colValue.Name = "colValue";
             // 
             // MainForm
             // 
