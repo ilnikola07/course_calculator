@@ -33,18 +33,19 @@
             // 
             // listBoxHist
             // 
+            listBoxHist.Dock = DockStyle.Fill;
             listBoxHist.FormattingEnabled = true;
             listBoxHist.ItemHeight = 15;
-            listBoxHist.Location = new Point(159, 76);
+            listBoxHist.Location = new Point(0, 0);
             listBoxHist.Name = "listBoxHist";
-            listBoxHist.Size = new Size(351, 94);
+            listBoxHist.Size = new Size(517, 256);
             listBoxHist.TabIndex = 0;
             // 
             // FormHistory
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(776, 404);
+            ClientSize = new Size(517, 256);
             Controls.Add(listBoxHist);
             Name = "FormHistory";
             Text = "История";

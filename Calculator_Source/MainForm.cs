@@ -22,7 +22,13 @@ namespace course_calculator
         private void btnHistory_Click(object sender, EventArgs e)
         {
             FormHistory historyForm = new FormHistory(historyManager.GetAll());
-            historyForm.Show();
+            DialogResult result = historyForm.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                string expression = historyForm.SelectedExpression; // Получаем выбранное выражение
+                txtExpression.Text = expression; // Вставляем в поле ввода главной формы
+            }
         }
 
         private void BtnDigit_Click(object sender, EventArgs e)
