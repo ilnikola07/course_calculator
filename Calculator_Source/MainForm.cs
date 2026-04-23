@@ -1,10 +1,13 @@
 ﻿using Course_calculator;
 using CalcLib;
+using System.Linq;
 
 namespace course_calculator
 {
     public partial class MainForm : Form
     {
+        private CalcHistory historyManager = new CalcHistory();
+        private CalcLib.CalcHistory calculatorHistory = new CalcLib.CalcHistory();
         public MainForm()
         {
             InitializeComponent();
@@ -18,8 +21,8 @@ namespace course_calculator
 
         private void btnHistory_Click(object sender, EventArgs e)
         {
-            FormHistory history = new FormHistory();
-            history.Show();
+            FormHistory historyForm = new FormHistory(historyManager.GetAll());
+            historyForm.Show();
         }
 
         private void BtnDigit_Click(object sender, EventArgs e)
@@ -58,12 +61,10 @@ namespace course_calculator
         {
             if (txtExpression.Text.Length > 0)
             {
-                txtExpression.Text = txtExpression.Text.Remove(txtExpression.Text.Length - 1);// Убираем ровно один символ с конца
+                // Просто удаляем последний символ
+                txtExpression.Text = txtExpression.Text.Remove(txtExpression.Text.Length - 1);
 
-                if (txtExpression.Text.EndsWith(" "))// Если после удаления остался пробел (от оператора), удаляем и его
-                {
-                    txtExpression.Text = txtExpression.Text.TrimEnd();
-                }
+                txtExpression.SelectionStart = txtExpression.Text.Length;
             }
         }
 
@@ -73,16 +74,10 @@ namespace course_calculator
             {
                 string op = btn.Text;
 
+                // Просто добавляем оператор без пробелов
+                txtExpression.Text += op;
 
-                if (op == "√") // Логика пробелов для красоты 
-                {
-                    txtExpression.Text += " √ ";// Так как корень пишется перед числом
-                }
-                else
-                {
-                    txtExpression.Text += " " + op + " ";// Остальные операторы ставятся между числами
-                }
-                txtExpression.Focus(); // Возвращаем курсор в конец
+                txtExpression.Focus();
                 txtExpression.SelectionStart = txtExpression.Text.Length;
             }
         }
@@ -127,7 +122,7 @@ namespace course_calculator
             {
                 var engine = new CalcEngine();
                 var vars = new Dictionary<string, double>(); // Получаем переменные из таблицы (ваша правая панель)
-                double result = engine.Calculate(txtExpression.Text, vars);
+                double result = engine.Calculate(txtExpression.Text.ToLower(), vars);
                 txtResult.Text = result.ToString();
             }
             catch (Exception ex)
@@ -140,14 +135,13 @@ namespace course_calculator
                 var engine = new CalcEngine();
                 var vars = new Dictionary<string, double>();
 
-                // Собираем переменные из таблицы
                 foreach (DataGridViewRow row in dataGridViewPer.Rows)
                 {
-                    // Пропускаем пустые или неполные строки
                     if (row.Cells[0].Value != null && row.Cells[1].Value != null)
                     {
-                        string name = row.Cells[0].Value.ToString().Trim();
-                        string valStr = row.Cells[1].Value.ToString().Replace('.', ','); // заменяем точку на запятую для Double.Parse
+                        // .ToLower() делает имя переменной строчным (x)
+                        string name = row.Cells[0].Value.ToString().Trim().ToLower();
+                        string valStr = row.Cells[1].Value.ToString().Trim().Replace('.', ',');
 
                         if (!string.IsNullOrEmpty(name) && double.TryParse(valStr, out double value))
                         {
@@ -156,11 +150,13 @@ namespace course_calculator
                     }
                 }
 
-                double result = engine.Calculate(txtExpression.Text, vars);
+                // Здесь тоже добавляем .ToLower(), чтобы x/z превратилось в x/z (на всякий случай)
+                double result = engine.Calculate(txtExpression.Text.Trim().ToLower(), vars);
                 txtResult.Text = result.ToString();
 
-                // Сюда потом добавим сохранение в историю:
-                // history.Add(txtExpression.Text, result); 
+                historyManager.Add(txtExpression.Text, result);
+                // СОХРАНЯЕМ В ИСТОРИЮ
+                calculatorHistory.Add(txtExpression.Text, result);
             }
             catch (Exception ex)
             {
@@ -210,6 +206,20 @@ namespace course_calculator
                     MessageBox.Show("Значение должно быть числом!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     e.Cancel = true;
                 }
+            }
+        }
+
+        private void dataGridViewPer_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Проверяем, нажата ли клавиша Delete
+            if (e.KeyCode == Keys.Delete)
+            {
+                foreach (DataGridViewCell cell in dataGridViewPer.SelectedCells)
+                {
+                    // Очищаем значение в выделенных ячейках
+                    cell.Value = string.Empty;
+                }
+                e.Handled = true; // Сообщаем системе, что нажатие обработано
             }
         }
     }

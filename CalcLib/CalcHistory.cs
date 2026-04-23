@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CalcLib
 {
-    internal class CalcHistory
+    public class CalcHistory
     {
         private List<string> history = new List<string>();
 

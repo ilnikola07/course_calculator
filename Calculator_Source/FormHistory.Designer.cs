@@ -28,18 +28,31 @@
         /// </summary>
         private void InitializeComponent()
         {
+            listBoxHist = new ListBox();
             SuspendLayout();
             // 
-            // HistoryForm
+            // listBoxHist
+            // 
+            listBoxHist.FormattingEnabled = true;
+            listBoxHist.ItemHeight = 15;
+            listBoxHist.Location = new Point(159, 76);
+            listBoxHist.Name = "listBoxHist";
+            listBoxHist.Size = new Size(351, 94);
+            listBoxHist.TabIndex = 0;
+            // 
+            // FormHistory
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(776, 404);
-            Name = "HistoryForm";
+            Controls.Add(listBoxHist);
+            Name = "FormHistory";
             Text = "История";
             ResumeLayout(false);
         }
 
         #endregion
+
+        private ListBox listBoxHist;
     }
 }

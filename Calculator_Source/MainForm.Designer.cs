@@ -472,6 +472,7 @@
             dataGridViewPer.Size = new Size(172, 80);
             dataGridViewPer.TabIndex = 14;
             dataGridViewPer.CellValidating += dataGridViewPer_CellValidating;
+            dataGridViewPer.KeyDown += dataGridViewPer_KeyDown;
             // 
             // colName
             // 

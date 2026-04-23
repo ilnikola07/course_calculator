@@ -24,14 +24,12 @@ namespace CalcLib
             var tokens = Tokenize(expression);// Токенизация
 
             var postfix = ToPostfix(tokens); // Алгоритм Дейкстры - превращаем обычную запись в постфиксную
-                                              
+
             return Evaluate(postfix, variables);// Вычисление
         }
         private bool IsFunction(string token)
         {
             return new List<string> { "sin", "cos", "tg", "abs", "log", "ln", "pow", "sqrt", "√" }.Contains(token.ToLower());
-            // Создаём список с названиями функций, берём строку token и переводим в нижний 
-            // регистр (чтобы прочиталось), а .Contains(...) — ищет результат в созданном списке
         }
 
         private List<string> ToPostfix(List<string> tokens)
@@ -41,9 +39,11 @@ namespace CalcLib
 
             foreach (var token in tokens)
             {
+                if (string.IsNullOrWhiteSpace(token)) continue;
+
                 if (double.TryParse(token, out _) || IsVariable(token))
                 {
-                    output.Add(token); // Числа и переменные сразу в результат
+                    output.Add(token); // Числа и переменные — сразу в выход
                 }
                 else if (IsFunction(token) || token == "(")
                 {
@@ -53,29 +53,47 @@ namespace CalcLib
                 {
                     while (stack.Count > 0 && stack.Peek() != "(")
                         output.Add(stack.Pop());
-                    stack.Pop(); // Создаём открывающую скобку
-                }
-                else // Иначе если это оператор
-                {
-                    while (stack.Count > 0 && GetPriority(stack.Peek()) >= GetPriority(token))
+
+                    if (stack.Count > 0) stack.Pop(); // Удаляем саму "("
+
+                    // Если перед скобкой была функция (sin, cos...), её тоже в выход
+                    if (stack.Count > 0 && IsFunction(stack.Peek()))
                         output.Add(stack.Pop());
+                }
+                else // Если это оператор (+, -, *, /, ^)
+                {
+                    while (stack.Count > 0 && GetPriority(stack.Peek()) >= GetPriority(token) && stack.Peek() != "(")
+                    {
+                        output.Add(stack.Pop());
+                    }
                     stack.Push(token);
                 }
             }
-            while (stack.Count > 0) 
-                output.Add(stack.Pop());
+
+            while (stack.Count > 0)
+            {
+                string op = stack.Pop();
+                if (op != "(") output.Add(op); // Добавляем только операторы, не скобки
+            }
+
             return output;
         }
 
 
         private List<string> Tokenize(string expr)
         {
-            // Регулярное выражение для чисел, функций, переменных и операторов
-            var pattern = @"(\d+\.?\d*)|([a-zA-Z]+)|(\+|-|\*|/|\^|\(|\)|,|√)";
-            var matches = Regex.Matches(expr.Replace(" ", ""), pattern);
+            // Убираем все пробелы перед делением на токены
+            string cleanExpr = expr.Replace(" ", "");
+            var pattern = @"(\d+[\.,]?\d*)|([a-zA-Z]+)|(\+|-|\*|/|\^|\(|\)|,|√)";
+            var matches = Regex.Matches(cleanExpr, pattern);
+
             var tokens = new List<string>();
-            foreach (Match m in matches) 
-                tokens.Add(m.Value);
+            foreach (Match m in matches)
+            {
+                string val = m.Value.Trim(); // Чистим каждый токен
+                if (!string.IsNullOrWhiteSpace(val))
+                    tokens.Add(val);
+            }
             return tokens;
         }
 
@@ -86,35 +104,49 @@ namespace CalcLib
 
             foreach (var token in postfix)
             {
+                if (string.IsNullOrWhiteSpace(token)) continue; // Пропускаем пустоту
+
                 if (double.TryParse(token, out double number))
                 {
                     stack.Push(number);
                 }
                 else if (variables.ContainsKey(token))
                 {
-                    stack.Push(variables[token]); // Подставляем значение переменной
+                    stack.Push(variables[token]);
                 }
+                else if (variables.ContainsKey(token.Trim())) // Добавь .Trim()
+                {
+                    stack.Push(variables[token.Trim()]);
+                }
+                else if (!double.TryParse(token, out _) && !IsFunction(token) && !"+-*/^√()".Contains(token))
+                {
+                    throw new CalcException($"Неизвестная переменная или символ: '{token}'");
+                }
+
                 else if (IsFunction(token))
                 {
+                    if (stack.Count < 1) continue; // Или throw, если хочешь строгую проверку
                     var val = stack.Pop();
-                    stack.Push(ApplyFunction(token, val)); // Считаем sin, cos и подобные
+                    stack.Push(ApplyFunction(token, val));
                 }
-                else
+                else if ("+-*/^√".Contains(token)) // СТРОГАЯ ПРОВЕРКА: только если это оператор
                 {
+                    if (stack.Count < 2) throw new CalcException("Недостаточно данных для операции " + token);
                     var b = stack.Pop();
                     var a = stack.Pop();
-                    stack.Push(ExecuteOperation(token, a, b)); // Считаем +, -, *, /
+                    stack.Push(ExecuteOperation(token, a, b));
                 }
+                // Всё остальное (запятые, скобки, мусор) просто игнорируем
             }
-            return stack.Pop();
+
+            return stack.Count > 0 ? stack.Pop() : 0;
         }
 
         private bool IsVariable(string token)// Проверка переменная ли это
         {
-            //Токен считается переменной, если он
-            return !double.TryParse(token, out _) && // не число
-                   !"+-*/^()".Contains(token) && // не оператор
-                   !IsFunction(token); // не математическая функция
+            return !double.TryParse(token, out _) &&
+            !"+-*/^(),".Contains(token) && // Добавь запятую сюда
+            !IsFunction(token);
         }
 
         private double ApplyFunction(string func, double a) // Расчёт функций
