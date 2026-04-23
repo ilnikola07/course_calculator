@@ -113,28 +113,17 @@ namespace course_calculator
         private void btnEquals_Click(object sender, EventArgs e)
         {
             string text = txtExpression.Text;
-            int openBrackets = text.Split('(').Length - 1; // Считаем количество открытых и закрытых скобок
+            int openBrackets = text.Split('(').Length - 1;
             int closeBrackets = text.Split(')').Length - 1;
-            while (openBrackets > closeBrackets) // Добавляем недостающие закрывающие скобки
+            while (openBrackets > closeBrackets)
             {
                 text += ")";
                 closeBrackets++;
             }
             txtExpression.Text = text;
+
             if (string.IsNullOrWhiteSpace(txtExpression.Text))
                 return;
-
-            try
-            {
-                var engine = new CalcEngine();
-                var vars = new Dictionary<string, double>(); // Получаем переменные из таблицы (ваша правая панель)
-                double result = engine.Calculate(txtExpression.Text.ToLower(), vars);
-                txtResult.Text = result.ToString();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка: " + ex.Message, "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
 
             try
             {
@@ -145,7 +134,6 @@ namespace course_calculator
                 {
                     if (row.Cells[0].Value != null && row.Cells[1].Value != null)
                     {
-                        // .ToLower() делает имя переменной строчным (x)
                         string name = row.Cells[0].Value.ToString().Trim().ToLower();
                         string valStr = row.Cells[1].Value.ToString().Trim().Replace('.', ',');
 
@@ -156,20 +144,34 @@ namespace course_calculator
                     }
                 }
 
-                // Здесь тоже добавляем .ToLower(), чтобы x/z превратилось в x/z (на всякий случай)
                 double result = engine.Calculate(txtExpression.Text.Trim().ToLower(), vars);
+
+                // ПРОВЕРКА НА NaN И БЕСКОНЕЧНОСТЬ
+                if (double.IsNaN(result))
+                {
+                    MessageBox.Show("Ошибка: недопустимая операция (возможно, деление на ноль или логарифм от неположительного числа т.д.)",
+                                    "Ошибка вычисления", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtResult.Text = "Ошибка";
+                    return;
+                }
+
+                if (double.IsInfinity(result))
+                {
+                    MessageBox.Show("Ошибка: бесконечный результат",
+                                    "Ошибка вычисления", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtResult.Text = "Ошибка";
+                    return;
+                }
+
                 txtResult.Text = result.ToString();
 
                 historyManager.Add(txtExpression.Text, result);
-                // СОХРАНЯЕМ В ИСТОРИЮ
                 calculatorHistory.Add(txtExpression.Text, result);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Ошибка: " + ex.Message, "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-
         }
 
         private void FunctionButton(object sender, EventArgs e) // Oтвечает за визуальную вставку функции в поле ввода
