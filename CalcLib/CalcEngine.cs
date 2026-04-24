@@ -114,13 +114,13 @@ namespace CalcLib
                 {
                     stack.Push(variables[token]);
                 }
-                else if (variables.ContainsKey(token.Trim())) // Добавь .Trim()
+                else if (variables.ContainsKey(token.Trim())) 
                 {
                     stack.Push(variables[token.Trim()]);
                 }
                 else if (!double.TryParse(token, out _) && !IsFunction(token) && !"+-*/^√()".Contains(token))
                 {
-                    throw new CalcException($"Неизвестная переменная или символ: '{token}'");
+                    throw CalcException.InvalidVariable(token); // с указанием имени переменной
                 }
 
                 else if (IsFunction(token))
@@ -131,7 +131,9 @@ namespace CalcLib
                 }
                 else if ("+-*/^√".Contains(token)) // СТРОГАЯ ПРОВЕРКА: только если это оператор
                 {
-                    if (stack.Count < 2) throw new CalcException("Недостаточно данных для операции " + token);
+                    if (stack.Count < 2)
+                        throw new CalcException("Недостаточно данных для операции " + token, CalcErrorCode.StackUnderflow);
+
                     var b = stack.Pop();
                     var a = stack.Pop();
                     stack.Push(ExecuteOperation(token, a, b));
@@ -153,8 +155,9 @@ namespace CalcLib
         {
             switch (func.ToLower())
             {
+                case "sqrt":
                 case "√":
-                case "sqrt": 
+                    if (a < 0) throw CalcException.MathDomainError("квадратного корня", a);
                     return Math.Sqrt(a);
                 case "sin": 
                     return Math.Sin(a);
@@ -165,11 +168,12 @@ namespace CalcLib
                 case "abs":
                     return Math.Abs(a);
                 case "ln":
+                    if (a <= 0) throw CalcException.MathDomainError("логарифма", a);
                     return Math.Log(a);
                 case "log":
                     return Math.Log10(a);
-                default: 
-                    throw new Exception("Неизвестная функция");
+                default:
+                    throw CalcException.InvalidFunction(func);
             }
         }
 
@@ -181,13 +185,13 @@ namespace CalcLib
                 case "-": return a - b;
                 case "*": return a * b;
                 case "/":
-                    if (b == 0) 
-                        throw new CalcException("Деление на ноль!");
+                    if (b == 0)
+                        throw CalcException.DivisionByZero();
                     return a / b;
                 case "^":
                     return Math.Pow(a, b);
-                default: 
-                    throw new CalcException("Неизвестный оператор: " + op);
+                default:
+                    throw new CalcException("Неизвестный оператор: " + op, CalcErrorCode.InvalidOperator);
             }
         }
     }

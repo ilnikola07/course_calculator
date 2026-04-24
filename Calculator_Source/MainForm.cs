@@ -112,9 +112,13 @@ namespace course_calculator
 
         private void btnEquals_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtExpression.Text))
+                return;
+
+            // Добавляем недостающие скобки
             string text = txtExpression.Text;
-            int openBrackets = text.Split('(').Length - 1;
-            int closeBrackets = text.Split(')').Length - 1;
+            int openBrackets = text.Count(c => c == '(');
+            int closeBrackets = text.Count(c => c == ')');
             while (openBrackets > closeBrackets)
             {
                 text += ")";
@@ -122,16 +126,13 @@ namespace course_calculator
             }
             txtExpression.Text = text;
 
-            if (string.IsNullOrWhiteSpace(txtExpression.Text))
-                return;
-
             try
             {
-                var engine = new CalcEngine();
-                var vars = new Dictionary<string, double>();
-
+                var variables = new Dictionary<string, double>();
                 foreach (DataGridViewRow row in dataGridViewPer.Rows)
                 {
+                    if (row.IsNewRow) continue; // Пропускаем новую пустую строку
+
                     if (row.Cells[0].Value != null && row.Cells[1].Value != null)
                     {
                         string name = row.Cells[0].Value.ToString().Trim().ToLower();
@@ -139,38 +140,52 @@ namespace course_calculator
 
                         if (!string.IsNullOrEmpty(name) && double.TryParse(valStr, out double value))
                         {
-                            vars[name] = value;
+                            variables[name] = value;
                         }
                     }
                 }
 
-                double result = engine.Calculate(txtExpression.Text.Trim().ToLower(), vars);
+                // Вычисляем
+                var engine = new CalcEngine();
+                double result = engine.Calculate(text.Trim().ToLower(), variables);
 
-                // ПРОВЕРКА НА NaN И БЕСКОНЕЧНОСТЬ
+                // Проверка на NaN/Infinity (резервная, если исключения не сработали)
                 if (double.IsNaN(result))
-                {
-                    MessageBox.Show("Ошибка: недопустимая операция (возможно, деление на ноль или логарифм от неположительного числа т.д.)",
-                                    "Ошибка вычисления", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtResult.Text = "Ошибка";
-                    return;
-                }
+                    throw CalcException.MathDomainError("результат", result);
 
                 if (double.IsInfinity(result))
-                {
-                    MessageBox.Show("Ошибка: бесконечный результат",
-                                    "Ошибка вычисления", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtResult.Text = "Ошибка";
-                    return;
-                }
+                    throw new CalcException("Бесконечный результат", CalcErrorCode.ResultInfinity);
 
                 txtResult.Text = result.ToString();
 
+                // Сохраняем в историю
                 historyManager.Add(txtExpression.Text, result);
                 calculatorHistory.Add(txtExpression.Text, result);
             }
+            catch (CalcException ex)
+            {
+                string message = ex.Message;
+
+                // Добавляем подсказку, если есть
+                if (!string.IsNullOrEmpty(ex.Suggestion))
+                    message += "\n\n " + ex.Suggestion;
+
+                // Показываем иконку в зависимости от типа ошибки
+                var icon = ex.ErrorCode switch
+                {
+                    CalcErrorCode.DivisionByZero or CalcErrorCode.MathDomainError => MessageBoxIcon.Warning,
+                    CalcErrorCode.InvalidVariable or CalcErrorCode.SyntaxError => MessageBoxIcon.Error,
+                    _ => MessageBoxIcon.Error
+                };
+
+                MessageBox.Show(message, "Ошибка вычисления", MessageBoxButtons.OK, icon);
+                txtResult.Text = "Ошибка";
+            }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка: " + ex.Message, "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Неожиданные ошибки — для отладки
+                MessageBox.Show("Непредвиденная ошибка: " + ex.Message,
+                               "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
