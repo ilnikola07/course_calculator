@@ -1,20 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace CalcLib
 {
+    /// <summary>
+    /// Менеджер истории вычислений
+    /// </summary>
     public class CalcHistory
     {
-        private List<string> history = new List<string>();
-
+        private readonly List<string> _history = new List<string>();
+        private readonly int _maxHistoryItems;
+        public CalcHistory(int maxItems = 100)
+        {
+            _maxHistoryItems = maxItems;
+        }
+        /// <summary>
+        /// Добавляет запись в историю
+        /// </summary>
         public void Add(string expression, double result)
         {
-            history.Add($"{expression} = {result}");
+            var entry = $"{expression} = {result}";
+            _history.Add(entry);
+            if (_history.Count > _maxHistoryItems)
+            {
+                _history.RemoveAt(0);
+            }
         }
-
-        public List<string> GetAll() => history;
+        /// <summary>
+        /// Возвращает все записи истории
+        /// </summary>
+        public List<string> GetAll()
+        {
+            return new List<string>(_history);
+        }
+        /// <summary>
+        /// Очищает историю
+        /// </summary>
+        public void Clear()
+        {
+            _history.Clear();
+        }
+        /// <summary>
+        /// Количество записей в истории
+        /// </summary>
+        public int Count
+        {
+            get { return _history.Count; }
+        }
     }
 }

@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace CalcLib
 {
+    /// <summary>
+    /// Коды ошибок для калькулятора
+    /// </summary>
     public enum CalcErrorCode
     {
         Unknown,
@@ -17,14 +15,18 @@ namespace CalcLib
         MathDomainError,    // логарифм от отрицательного, корень из отрицательного
         StackUnderflow,     // не хватает операндов
         ResultNaN,
-        ResultInfinity
+        ResultInfinity,
+        UnbalancedParentheses
     }
+
+    /// <summary>
+    /// Исключение, возникающее при ошибках вычислений
+    /// </summary>
     public class CalcException : Exception
     {
         public CalcErrorCode ErrorCode { get; }
-        public string Token { get; }          // проблемный токен (если есть)
-        public int Position { get; }          // позиция в выражении (если известно)
-        public string Suggestion { get; }     // подсказка по исправлению
+        public string Token { get; }
+        public int Position { get; }
 
         public CalcException(string message, CalcErrorCode code = CalcErrorCode.Unknown)
             : base(message)
@@ -44,7 +46,6 @@ namespace CalcLib
             Position = position;
         }
 
-
         public static CalcException DivisionByZero() =>
             new CalcException("Деление на ноль!", CalcErrorCode.DivisionByZero);
 
@@ -63,8 +64,13 @@ namespace CalcLib
         public static CalcException SyntaxError(string details) =>
             new CalcException($"Синтаксическая ошибка: {details}",
                              CalcErrorCode.SyntaxError);
+
+        public static CalcException UnbalancedParentheses() =>
+            new CalcException("Несбалансированные скобки в выражении",
+                             CalcErrorCode.UnbalancedParentheses);
+
+        public static CalcException StackUnderflow(string operation) =>
+            new CalcException($"Недостаточно операндов для операции: {operation}",
+                             CalcErrorCode.StackUnderflow);
     }
 }
-
-
-    

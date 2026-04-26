@@ -1,16 +1,23 @@
-﻿using Course_calculator;
-using CalcLib;
+﻿using CalcLib;
+using Course_calculator;
+using System;
+using System.Collections.Generic;
+using System.Globalization;  
 using System.Linq;
+using System.Linq.Expressions;
+using System.Windows.Forms;
 
-namespace course_calculator
+namespace course_calculator  
 {
     public partial class MainForm : Form
     {
         private CalcHistory historyManager = new CalcHistory();
-        private CalcLib.CalcHistory calculatorHistory = new CalcLib.CalcHistory();
+        private Dictionary<string, double> variables = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+
         public MainForm()
         {
             InitializeComponent();
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
         }
 
         private void btnRef_Click(object sender, EventArgs e)
@@ -26,50 +33,66 @@ namespace course_calculator
 
             if (result == DialogResult.OK)
             {
-                string expression = historyForm.SelectedExpression; // Получаем выбранное выражение
-                txtExpression.Text = expression; // Вставляем в поле ввода главной формы
+                string expression = historyForm.SelectedExpression;
+                txtExpression.Text = expression;
             }
         }
 
         private void BtnDigit_Click(object sender, EventArgs e)
         {
-            Button btn = (Button)sender;
-
-            if (sender is Button clickedButton)// Определение, какая именно кнопка была нажата
+            if (sender is Button clickedButton)
             {
                 string digit = clickedButton.Text;
-                if (digit == ",") // Логика для запятой (разделителя)
+
+                if (digit == ",")
                 {
-                    if (string.IsNullOrEmpty(txtExpression.Text)) // Проверка, чтобы в поле уже что-то было
+                    // Проверяем, чтобы не было двух запятых в одном числе
+                    if (string.IsNullOrEmpty(txtExpression.Text))
                     {
                         txtExpression.Text = "0,";
-                        return;
-                    }
-                    if (txtExpression.Text.EndsWith(","))// Простая проверка: не даем поставить две запятые подряд
-                    {
+                        txtExpression.Focus();
+                        txtExpression.SelectionStart = txtExpression.Text.Length;
                         return;
                     }
 
+                    // Находим последнюю операцию или скобку
+                    string lastPart = txtExpression.Text;
+                    int lastOp = Math.Max(
+                        lastPart.LastIndexOf('+'),
+                        Math.Max(lastPart.LastIndexOf('-'),
+                        Math.Max(lastPart.LastIndexOf('*'),
+                        Math.Max(lastPart.LastIndexOf('/'),
+                        Math.Max(lastPart.LastIndexOf('('),
+                        Math.Max(lastPart.LastIndexOf('^'),
+                        lastPart.LastIndexOf('=')))))));
+
+                    if (lastOp >= 0)
+                        lastPart = lastPart.Substring(lastOp + 1);
+
+                    // Если в текущем числе уже есть запятая или точка — не добавляем
+                    if (lastPart.Contains(",") || lastPart.Contains("."))
+                    {
+                        return;
+                    }
                 }
-                txtExpression.Text += digit; // Добавляем символ в текстовое поле                
-                txtExpression.Focus();// Устанавливаем фокус обратно в поле и переводим курсор в конец
+
+                txtExpression.Text += digit;  // ← Добавляем как есть (запятую как запятую!)
+                txtExpression.Focus();
                 txtExpression.SelectionStart = txtExpression.Text.Length;
             }
         }
 
         private void btnClear_Click(object sender, EventArgs e)
         {
-            txtExpression.Clear(); // Очистить ввод
-            txtResult.Clear();     // Очистить результат
+            txtExpression.Clear();
+            txtResult.Clear();
         }
 
         private void btnBackspace_Click(object sender, EventArgs e)
         {
             if (txtExpression.Text.Length > 0)
             {
-                // Просто удаляем последний символ
-                txtExpression.Text = txtExpression.Text.Remove(txtExpression.Text.Length - 1);
-
+                txtExpression.Text = txtExpression.Text.Substring(0, txtExpression.Text.Length - 1);
                 txtExpression.SelectionStart = txtExpression.Text.Length;
             }
         }
@@ -79,43 +102,38 @@ namespace course_calculator
             if (sender is Button btn)
             {
                 string op = btn.Text;
-
-                // Просто добавляем оператор без пробелов
                 txtExpression.Text += op;
-
                 txtExpression.Focus();
                 txtExpression.SelectionStart = txtExpression.Text.Length;
             }
         }
+
         private void BtnParenthesis_Click(object sender, EventArgs e)
         {
             if (sender is Button btn)
             {
                 string parenthesis = btn.Text;
-                if (parenthesis == ")") // Если нажата закрывающая скобка
+                if (parenthesis == ")")
                 {
-                    int openCount = txtExpression.Text.Count(f => f == '('); // Считаем количество открывающих и закрывающих скобок в строке
+                    int openCount = txtExpression.Text.Count(f => f == '(');
                     int closeCount = txtExpression.Text.Count(f => f == ')');
 
-                    if (closeCount >= openCount) // Если закрывающих уже столько же, сколько открытых (или больше)
+                    if (closeCount >= openCount)
                     {
                         MessageBox.Show("Ошибка: нет соответствующей открывающей скобки!",
                                         "Ошибка синтаксиса", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return; // Выходим из метода, не добавляя скобку в поле
+                        return;
                     }
                 }
-                txtExpression.Text += parenthesis;  // Если проверка пройдена или это открывающая скобка — добавляем в поле               
-                txtExpression.Focus(); // Возвращаем фокус и курсор в конец
+                txtExpression.Text += parenthesis;
+                txtExpression.Focus();
                 txtExpression.SelectionStart = txtExpression.Text.Length;
             }
         }
 
         private void btnEquals_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtExpression.Text))
-                return;
-
-            // Добавляем недостающие скобки
+            if (string.IsNullOrWhiteSpace(txtExpression.Text)) return;
             string text = txtExpression.Text;
             int openBrackets = text.Count(c => c == '(');
             int closeBrackets = text.Count(c => c == ')');
@@ -124,75 +142,51 @@ namespace course_calculator
                 text += ")";
                 closeBrackets++;
             }
-            txtExpression.Text = text;
+            txtExpression.Text = text;  
 
             try
             {
-                var variables = new Dictionary<string, double>();
+                variables.Clear();
                 foreach (DataGridViewRow row in dataGridViewPer.Rows)
                 {
-                    if (row.IsNewRow) continue; // Пропускаем новую пустую строку
+                    if (row.IsNewRow) continue;
+                    var name = row.Cells[0].Value?.ToString()?.Trim();
+                    var valStr = row.Cells[1].Value?.ToString()?.Trim();
 
-                    if (row.Cells[0].Value != null && row.Cells[1].Value != null)
-                    {
-                        string name = row.Cells[0].Value.ToString().Trim().ToLower();
-                        string valStr = row.Cells[1].Value.ToString().Trim().Replace('.', ',');
+                    if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(valStr)) continue;
 
-                        if (!string.IsNullOrEmpty(name) && double.TryParse(valStr, out double value))
-                        {
-                            variables[name] = value;
-                        }
-                    }
+                    valStr = valStr.Replace(',', '.');
+                    if (double.TryParse(valStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double val))
+                        variables[name] = val; 
                 }
 
-                // Вычисляем
                 var engine = new CalcEngine();
-                double result = engine.Calculate(text.Trim().ToLower(), variables);
+                double result = engine.Calculate(text.Trim(), variables);  
+                if (double.IsNaN(result)) throw CalcException.MathDomainError("вычисление", result);
+                if (double.IsInfinity(result)) throw new CalcException("Бесконечный результат", CalcErrorCode.ResultInfinity);
 
-                // Проверка на NaN/Infinity (резервная, если исключения не сработали)
-                if (double.IsNaN(result))
-                    throw CalcException.MathDomainError("результат", result);
-
-                if (double.IsInfinity(result))
-                    throw new CalcException("Бесконечный результат", CalcErrorCode.ResultInfinity);
-
-                txtResult.Text = result.ToString();
-
-                // Сохраняем в историю
-                historyManager.Add(txtExpression.Text, result);
-                calculatorHistory.Add(txtExpression.Text, result);
+                txtResult.Text = result.ToString("G15", CultureInfo.InvariantCulture);
+                historyManager.Add(txtExpression.Text, result);  
             }
             catch (CalcException ex)
             {
-                string message = ex.Message;
+                MessageBoxIcon icon = MessageBoxIcon.Error;
+                if (ex.ErrorCode == CalcErrorCode.DivisionByZero || ex.ErrorCode == CalcErrorCode.MathDomainError)
+                    icon = MessageBoxIcon.Warning;
 
-                // Добавляем подсказку, если есть
-                if (!string.IsNullOrEmpty(ex.Suggestion))
-                    message += "\n\n " + ex.Suggestion;
-
-                // Показываем иконку в зависимости от типа ошибки
-                var icon = ex.ErrorCode switch
-                {
-                    CalcErrorCode.DivisionByZero or CalcErrorCode.MathDomainError => MessageBoxIcon.Warning,
-                    CalcErrorCode.InvalidVariable or CalcErrorCode.SyntaxError => MessageBoxIcon.Error,
-                    _ => MessageBoxIcon.Error
-                };
-
-                MessageBox.Show(message, "Ошибка вычисления", MessageBoxButtons.OK, icon);
+                MessageBox.Show(ex.Message, "Ошибка вычисления", MessageBoxButtons.OK, icon);
                 txtResult.Text = "Ошибка";
             }
             catch (Exception ex)
             {
-                // Неожиданные ошибки — для отладки
-                MessageBox.Show("Непредвиденная ошибка: " + ex.Message,
-                               "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Непредвиденная ошибка: " + ex.Message, "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void FunctionButton(object sender, EventArgs e) // Oтвечает за визуальную вставку функции в поле ввода
+        private void FunctionButton(object sender, EventArgs e)
         {
-            var button = (Button)sender; // Определяем, какая кнопка нажата
-            string func = button.Text.ToLower(); // Берем текст кнопки (например, "cos")
+            var button = (Button)sender;
+            string func = button.Text.ToLower();
 
             txtExpression.Text += func + "(";
             txtExpression.Focus();
@@ -207,24 +201,22 @@ namespace course_calculator
 
         private void dataGridViewPer_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
-            // Индекс 0 — колонка "Переменная", Индекс 1 — колонка "Значение"
             string value = e.FormattedValue.ToString().Trim();
 
-            if (string.IsNullOrEmpty(value)) return; // Разрешаем пустые ячейки (для удаления)
+            if (string.IsNullOrEmpty(value)) return;
 
-            if (e.ColumnIndex == 0) // Проверка имени переменной
+            if (e.ColumnIndex == 0)
             {
-                // Проверяем, что в имени только буквы (латиница/кириллица)
                 if (!value.All(char.IsLetter))
                 {
                     MessageBox.Show("Имя переменной должно состоять только из букв!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    e.Cancel = true; // Отменяем переход, заставляя исправить ввод
+                    e.Cancel = true;
                 }
             }
-            else if (e.ColumnIndex == 1) // Проверка значения
+            else if (e.ColumnIndex == 1)
             {
-                // Пытаемся преобразовать в число (с учетом запятой/точки)
-                if (!double.TryParse(value.Replace('.', ','), out _))
+                string normalized = value.Replace(',', '.');
+                if (!double.TryParse(normalized, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
                 {
                     MessageBox.Show("Значение должно быть числом!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     e.Cancel = true;
@@ -234,15 +226,13 @@ namespace course_calculator
 
         private void dataGridViewPer_KeyDown(object sender, KeyEventArgs e)
         {
-            // Проверяем, нажата ли клавиша Delete
             if (e.KeyCode == Keys.Delete)
             {
                 foreach (DataGridViewCell cell in dataGridViewPer.SelectedCells)
                 {
-                    // Очищаем значение в выделенных ячейках
                     cell.Value = string.Empty;
                 }
-                e.Handled = true; // Сообщаем системе, что нажатие обработано
+                e.Handled = true;
             }
         }
     }
