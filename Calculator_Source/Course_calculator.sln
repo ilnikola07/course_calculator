@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseCalculator", "CourseC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalcLib", "..\CalcLib\CalcLib.csproj", "{6EEEBE55-EE06-4F54-8BE0-C7F698FCD34C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalcLibTests", "..\CalcEngineTests\CalcLibTests.csproj", "{9BB1ECAC-5224-40ED-88CF-78DF1FE52A28}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{6EEEBE55-EE06-4F54-8BE0-C7F698FCD34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EEEBE55-EE06-4F54-8BE0-C7F698FCD34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EEEBE55-EE06-4F54-8BE0-C7F698FCD34C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BB1ECAC-5224-40ED-88CF-78DF1FE52A28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BB1ECAC-5224-40ED-88CF-78DF1FE52A28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BB1ECAC-5224-40ED-88CF-78DF1FE52A28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BB1ECAC-5224-40ED-88CF-78DF1FE52A28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

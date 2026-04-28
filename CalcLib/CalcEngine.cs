@@ -299,7 +299,7 @@ namespace CalcLib
             return stack.Pop();
         }
 
-        private double ApplyFunction(string func, double a)
+        public double ApplyFunction(string func, double a)
         {
             return func.ToLower() switch
             {

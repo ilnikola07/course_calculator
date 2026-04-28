@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 namespace CalcLib
 {
     /// <summary>
@@ -22,6 +23,7 @@ namespace CalcLib
     /// <summary>
     /// Исключение, возникающее при ошибках вычислений
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class CalcException : Exception
     {
         public CalcErrorCode ErrorCode { get; }
