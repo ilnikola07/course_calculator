@@ -529,6 +529,8 @@
             Controls.Add(panelKeypad);
             Controls.Add(txtResult);
             Controls.Add(txtExpression);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
             Name = "MainForm";
             Text = "Ulitka Soft - Курсовая \"Калькулятор\"";
             panelKeypad.ResumeLayout(false);

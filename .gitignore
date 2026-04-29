@@ -15,3 +15,11 @@
 
 # Документы
 *.docx
+
+# Результаты тестирования и отчеты о покрытии
+TestResults/
+coveragereport/
+coverage-report/
+*.coverage
+*.coveragexml
+*.pstat

@@ -5,7 +5,7 @@ namespace CalcLib
     /// <summary>
     /// Коды ошибок для калькулятора
     /// </summary>
-    public enum CalcErrorCode
+    public enum CalcErrorCode // Перечисление возможных проблем
     {
         Unknown,
         DivisionByZero,
@@ -13,8 +13,8 @@ namespace CalcLib
         InvalidFunction,
         InvalidOperator,
         SyntaxError,
-        MathDomainError,    // логарифм от отрицательного, корень из отрицательного
-        StackUnderflow,     // не хватает операндов
+        MathDomainError,    // Логарифм от отрицательного, корень из отрицательного
+        StackUnderflow,     // Не хватает операндов
         ResultNaN,
         ResultInfinity,
         UnbalancedParentheses
@@ -23,7 +23,8 @@ namespace CalcLib
     /// <summary>
     /// Исключение, возникающее при ошибках вычислений
     /// </summary>
-    [ExcludeFromCodeCoverage]
+    /// 
+    [ExcludeFromCodeCoverage] // Исключить из отчёта о покрытии тестами
     public class CalcException : Exception
     {
         public CalcErrorCode ErrorCode { get; }
@@ -31,19 +32,19 @@ namespace CalcLib
         public int Position { get; }
 
         public CalcException(string message, CalcErrorCode code = CalcErrorCode.Unknown)
-            : base(message)
+            : base(message)  // Принимает текст ошибки (message) и code
         {
             ErrorCode = code;
         }
 
         public CalcException(string message, CalcErrorCode code, string token)
-            : this(message, code)
+            : this(message, code) // Создает ошибку и запоминает конкретное ошибочное слово или символ (token)
         {
             Token = token;
         }
 
         public CalcException(string message, CalcErrorCode code, int position)
-            : this(message, code)
+            : this(message, code) // Создает ошибку и запоминает индекс (номер символа) в строке, где была найдена проблема
         {
             Position = position;
         }

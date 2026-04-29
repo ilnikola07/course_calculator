@@ -38,14 +38,14 @@
             listBoxHist.ItemHeight = 15;
             listBoxHist.Location = new Point(0, 0);
             listBoxHist.Name = "listBoxHist";
-            listBoxHist.Size = new Size(517, 256);
+            listBoxHist.Size = new Size(553, 256);
             listBoxHist.TabIndex = 0;
             // 
             // FormHistory
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(517, 256);
+            ClientSize = new Size(553, 256);
             Controls.Add(listBoxHist);
             Name = "FormHistory";
             Text = "История";

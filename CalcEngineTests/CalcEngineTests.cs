@@ -1,17 +1,4 @@
-﻿// ============================================================================
-// ФАЙЛ: CalcEngineTests.cs
-// ОПИСАНИЕ: Набор модульных тестов для класса CalcEngine
-//           Покрытие алгоритмов: токенизация, сортировочная станция, вычисление ОПЗ
-// ПРИНЦИП: AAA (Arrange-Act-Assert)
-// ТРЕБОВАНИЯ: 
-//   • Минимум 5 тестов на каждый алгоритм
-//   • Обязательные категории: типичные данные, граничный случай, некорректные данные,
-//     большой объём, специфический случай темы
-// АВТОР: [Ваше ФИО]
-// ДАТА: [Дата создания]
-// ============================================================================
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -22,9 +9,7 @@ using System.Reflection;
 namespace CalcLib.Tests
 {
     /// <summary>
-    /// Тестовый класс для проверки функциональности CalcEngine.
-    /// Использует рефлексию для доступа к приватным методам токенизации, 
-    /// конвертации в ОПЗ и вычисления.
+    /// Тестовый класс для проверки функциональности CalcEngine
     /// </summary>
     public class CalcEngineTests
     {
@@ -56,7 +41,7 @@ namespace CalcLib.Tests
 
         }
 
-        #region Тесты метода Tokenize
+        #region Тесты Tokenize (алгоритм токенизации)
 
         /// <summary>
         /// [Tokenize] ТИПИЧНЫЕ ДАННЫЕ
@@ -69,15 +54,12 @@ namespace CalcLib.Tests
         [Trait("Category", "Typical")]
         public void Tokenize_TypicalData_ReturnsCorrectTokens()
         {
-            // Arrange: подготовка входных данных и ожидаемого результата
             string expression = "2.5 + 3 * (4 - 1)";
             var expected = new List<string>
             { "2.5", "+", "3", "*", "(", "4", "-", "1", ")" };
 
-            // Act: выполнение тестируемого метода
             var result = (List<string>)_tokenizeMethod.Invoke(_engine, new object[] { expression });
 
-            // Assert: проверка соответствия результата ожиданию
             Assert.Equal(expected, result);
         }
 
@@ -91,14 +73,11 @@ namespace CalcLib.Tests
         [Trait("Category", "EdgeCase")]
         public void Tokenize_EdgeCase_SingleNumber()
         {
-            // Arrange
             string expression = "42";
             var expected = new List<string> { "42" };
 
-            // Act
             var result = (List<string>)_tokenizeMethod.Invoke(_engine, new object[] { expression });
 
-            // Assert
             Assert.Equal(expected, result);
         }
 
@@ -112,10 +91,8 @@ namespace CalcLib.Tests
         [Trait("Category", "InvalidInput")]
         public void Tokenize_InvalidInput_EmptyString_ThrowsException()
         {
-            // Arrange
             string expression = "";
 
-            // Act & Assert: метод должен выбросить целевое исключение
             var exception = Assert.Throws<TargetInvocationException>(
                 () => _tokenizeMethod.Invoke(_engine, new object[] { expression }));
 
@@ -133,65 +110,52 @@ namespace CalcLib.Tests
         [Trait("Category", "Performance")]
         public void Tokenize_LargeVolume_CompletesInReasonableTime()
         {
-            // Arrange: генерация выражения из 1000 переменных, разделённых '+'
             string expression = string.Join("+", Enumerable.Range(1, 1000).Select(i => $"x{i}"));
             var stopwatch = Stopwatch.StartNew();
 
-            // Act
             var result = (List<string>)_tokenizeMethod.Invoke(_engine, new object[] { expression });
             stopwatch.Stop();
 
-            // Assert: проверка количества токенов и времени выполнения
             Assert.Equal(1999, result.Count); // 1000 переменных + 999 операторов
             Assert.True(stopwatch.ElapsedMilliseconds < 1000,
                 $"Токенизация заняла {stopwatch.ElapsedMilliseconds}мс, ожидается <1000мс");
         }
 
         /// <summary>
-        /// [Tokenize] СПЕЦИФИЧЕСКИЙ СЛУЧАЙ: ОБРАБОТКА УНАРНОГО МИНУСА
+        /// [Tokenize]  ОБРАБОТКА УНАРНОГО МИНУСА
         /// Проверяет корректное преобразование бинарного '-' в унарный 'u-' 
         /// в позициях: начало выражения и после открывающей скобки.
-        /// Это критично для последующего вычисления отрицательных чисел.
         /// </summary>
         [Fact]
         [Trait("Algorithm", "Tokenize")]
         [Trait("Category", "Specific")]
         public void Tokenize_SpecificCase_UnaryMinusHandling()
         {
-            // Arrange
             string expression = "-5 + (-3 * 2)";
             var expected = new List<string>
             { "u-", "5", "+", "(", "u-", "3", "*", "2", ")" };
 
-            // Act
             var result = (List<string>)_tokenizeMethod.Invoke(_engine, new object[] { expression });
 
-            // Assert
             Assert.Equal(expected, result);
-            Assert.Contains("u-", result); // Подтверждение наличия маркера унарного минуса
+            Assert.Contains("u-", result); 
         }
 
         /// <summary>
-        /// [Tokenize] СПЕЦИФИЧЕСКИЙ СЛУЧАЙ: ПЕРЕМЕННЫЕ С КИРИЛЛИЦЕЙ И ГРЕЧЕСКИМИ БУКВАМИ
-        /// Проверяет поддержку идентификаторов на нелатинских алфавитах,
-        /// что важно для локализации и научных вычислений.
+        /// [Tokenize] ПЕРЕМЕННЫЕ С КИРИЛЛИЦЕЙ И ГРЕЧЕСКИМИ БУКВАМИ
+        /// Проверяет поддержку идентификаторов на нелатинских алфавитах
         /// </summary>
         [Fact]
         [Trait("Algorithm", "Tokenize")]
         [Trait("Category", "Specific")]
         public void Tokenize_SpecificCase_FunctionsWithGreekLetters()
         {
-            // Arrange
             string expression = "sin(α) + cos(β)";
-            // Греческие буквы могут не поддерживаться вашим парсером
-            // Проверьте, что вообще токенизируется
             var tokenizeMethod = typeof(CalcEngine).GetMethod("Tokenize",
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
-            // Act
             var result = (List<string>)tokenizeMethod.Invoke(_engine, new object[] { expression });
 
-            // Assert - проверьте что вообще получилось
             Assert.Contains("sin", result);
             Assert.Contains("cos", result);
             Assert.Contains("(", result);
@@ -202,7 +166,7 @@ namespace CalcLib.Tests
 
         #endregion
 
-        #region Тесты метода ToPostfix
+        #region Тесты ToPostfix (алгоритм сорт. станции)
 
         /// <summary>
         /// [ToPostfix] ТИПИЧНЫЕ ДАННЫЕ
@@ -214,14 +178,11 @@ namespace CalcLib.Tests
         [Trait("Category", "Typical")]
         public void ToPostfix_TypicalData_RespectsOperatorPrecedence()
         {
-            // Arrange
             var tokens = new List<string> { "2", "+", "3", "*", "4" };
             var expected = new List<string> { "2", "3", "4", "*", "+" };
 
-            // Act
             var result = (List<string>)_toPostfixMethod.Invoke(_engine, new object[] { tokens });
 
-            // Assert
             Assert.Equal(expected, result);
         }
 
@@ -235,14 +196,11 @@ namespace CalcLib.Tests
         [Trait("Category", "EdgeCase")]
         public void ToPostfix_EdgeCase_SingleToken()
         {
-            // Arrange
             var tokens = new List<string> { "123.45" };
             var expected = new List<string> { "123.45" };
 
-            // Act
             var result = (List<string>)_toPostfixMethod.Invoke(_engine, new object[] { tokens });
 
-            // Assert
             Assert.Equal(expected, result);
         }
 
@@ -256,10 +214,8 @@ namespace CalcLib.Tests
         [Trait("Category", "InvalidInput")]
         public void ToPostfix_InvalidInput_UnbalancedParentheses_ThrowsException()
         {
-            // Arrange
             var tokens = new List<string> { "2", "+", "(", "3", "*", "4" };
 
-            // Act & Assert
             var exception = Assert.Throws<TargetInvocationException>(
                 () => _toPostfixMethod.Invoke(_engine, new object[] { tokens }));
 
@@ -268,25 +224,22 @@ namespace CalcLib.Tests
 
 
         /// <summary>
-        /// [ToPostfix] СПЕЦИФИЧЕСКИЙ СЛУЧАЙ: ВЛОЖЕННЫЕ ФУНКЦИИ С АРГУМЕНТАМИ
+        /// [ToPostfix] ВЛОЖЕННЫЕ ФУНКЦИИ С АРГУМЕНТАМИ
         /// Проверяет корректную обработку функций с несколькими аргументами 
-        /// и вложенностью: sin(2,3) + log(10) → ОПЗ с правильным порядком.
+        /// и вложенностью: sin(2,3) + log(10) -> ОПЗ с правильным порядком.
         /// </summary>
         [Fact]
         [Trait("Algorithm", "ToPostfix")]
         [Trait("Category", "Specific")]
         public void ToPostfix_SpecificCase_NestedFunctionsWithArgs()
         {
-            // Arrange
             var tokens = new List<string>
             { "sin", "(", "2", ",", "3", ")", "+", "log", "(", "10", ")" };
             var expected = new List<string>
             { "2", "3", "sin", "10", "log", "+" };
 
-            // Act
             var result = (List<string>)_toPostfixMethod.Invoke(_engine, new object[] { tokens });
 
-            // Assert
             Assert.Equal(expected, result);
         }
 
@@ -302,39 +255,33 @@ namespace CalcLib.Tests
         [Trait("Category", "EdgeCase")]
         public void ToPostfix_EdgeCase_EmptyTokensList()
         {
-            // Arrange
             var tokens = new List<string>();
             var expected = new List<string>();
 
-            // Act
             var result = (List<string>)_toPostfixMethod.Invoke(_engine, new object[] { tokens });
 
-            // Assert
             Assert.Equal(expected, result);
         }
 
         #endregion
 
-        #region Тесты метода Evaluate
+        #region Тесты Evaluate (алгоритм ОПЗ)
 
         /// <summary>
         /// [Evaluate] ТИПИЧНЫЕ ДАННЫЕ
         /// Проверяет вычисление простого постфиксного выражения: 
-        /// "2 3 + 4 *" → (2+3)*4 = 20. Результат сравнивается с допуском 10^-10.
+        /// "2 3 + 4 *" -> (2+3)*4 = 20.
         /// </summary>
         [Fact]
         [Trait("Algorithm", "Evaluate")]
         [Trait("Category", "Typical")]
         public void Evaluate_TypicalData_CalculatesCorrectResult()
         {
-            // Arrange
-            var postfix = new List<string> { "2", "3", "+", "4", "*" }; // (2+3)*4 = 20
+            var postfix = new List<string> { "2", "3", "+", "4", "*" }; 
             var variables = new Dictionary<string, double>();
 
-            // Act
             var result = (double)_evaluateMethod.Invoke(_engine, new object[] { postfix, variables });
 
-            // Assert
             Assert.Equal(20.0, result, 10);
         }
 
@@ -348,34 +295,28 @@ namespace CalcLib.Tests
         [Trait("Category", "EdgeCase")]
         public void Evaluate_EdgeCase_SingleNumber()
         {
-            // Arrange
             var postfix = new List<string> { "-15.75" };
             var variables = new Dictionary<string, double>();
 
-            // Act
             var result = (double)_evaluateMethod.Invoke(_engine, new object[] { postfix, variables });
 
-            // Assert
             Assert.Equal(-15.75, result, 10);
         }
 
         /// <summary>
         /// [Evaluate] НЕКОРРЕКТНЫЕ ВХОДНЫЕ ДАННЫЕ
         /// Проверяет выброс исключения при недостатке операндов для бинарного оператора.
-        /// Вход: "5 +" → Ожидается: StackUnderflow.
+        /// Вход: "5 +" -> Ожидается: StackUnderflow.
         /// </summary>
         [Fact]
         public void Evaluate_InvalidInput_InsufficientOperands_ThrowsException()
         {
-            // Arrange
             var postfix = new List<string> { "5", "+" };
             var variables = new Dictionary<string, double>();
 
-            // Act & Assert
             var exception = Assert.Throws<TargetInvocationException>(
                 () => _evaluateMethod.Invoke(_engine, new object[] { postfix, variables }));
 
-            // Просто проверьте тип, а не сообщение
             Assert.IsType<CalcException>(exception.InnerException);
         }
 
@@ -389,7 +330,6 @@ namespace CalcLib.Tests
         [Trait("Category", "Performance")]
         public void Evaluate_LargeVolume_CompletesInReasonableTime()
         {
-            // Arrange
             var postfix = Enumerable.Range(1, 1000)
                 .Select(i => i.ToString())
                 .Concat(Enumerable.Repeat("+", 999))
@@ -397,12 +337,10 @@ namespace CalcLib.Tests
             var variables = new Dictionary<string, double>();
             var stopwatch = Stopwatch.StartNew();
 
-            // Act
             var result = (double)_evaluateMethod.Invoke(_engine, new object[] { postfix, variables });
             stopwatch.Stop();
 
-            // Assert
-            Assert.Equal(500500.0, result, 1); // сумма 1..1000
+            Assert.Equal(500500.0, result, 1); 
             Assert.True(stopwatch.ElapsedMilliseconds < 1000,
                 $"Вычисление заняло {stopwatch.ElapsedMilliseconds}мс, ожидается <1000мс");
         }
@@ -411,7 +349,7 @@ namespace CalcLib.Tests
 
         /// <summary>
         /// [Evaluate] БОЛЬШОЙ ОБЪЁМ: МНОЖЕСТВО ОПЕРАЦИЙ БЕЗ ПЕРЕПОЛНЕНИЯ СТЕКА
-        /// Стресс-тест: 1000 чисел и 999 операций сложения в ОПЗ.
+        /// 1000 чисел и 999 операций сложения в ОПЗ.
         /// Проверяет отсутствие переполнения стека и корректность результата.
         /// </summary>
         [Fact]
@@ -419,17 +357,14 @@ namespace CalcLib.Tests
         [Trait("Category", "Performance")]
         public void Evaluate_LargeVolume_ManyOperations_NoStackOverflow()
         {
-            // Arrange
             var postfix = Enumerable.Range(1, 1000)
                 .Select(i => i.ToString())
                 .Concat(Enumerable.Repeat("+", 999))
                 .ToList();
             var variables = new Dictionary<string, double>();
 
-            // Act
             var result = (double)_evaluateMethod.Invoke(_engine, new object[] { postfix, variables });
 
-            // Assert
             Assert.Equal(500500.0, result, 1);
         }
 
@@ -443,11 +378,9 @@ namespace CalcLib.Tests
         [Trait("Category", "InvalidInput")]
         public void Evaluate_InvalidInput_NullPostfix_ThrowsException()
         {
-            // Arrange
             List<string> postfix = null;
             var variables = new Dictionary<string, double>();
 
-            // Act & Assert
             var method = typeof(CalcEngine).GetMethod("Evaluate",
                 BindingFlags.NonPublic | BindingFlags.Instance);
             var exception = Assert.Throws<TargetInvocationException>(
@@ -461,7 +394,7 @@ namespace CalcLib.Tests
         #region Дополнительные тесты для максимального покрытия
 
         /// <summary>
-        /// [ToPostfix] ГРАНИЧНЫЙ СЛУЧАЙ: ПУСТЫЕ ТОКЕНЫ
+        /// [ToPostfix] ГРАНИЧНЫЙ СЛУЧАЙ ПУСТЫЕ ТОКЕНЫ
         /// Проверяет ветку `if (string.IsNullOrWhiteSpace(token)) continue`.
         /// </summary>
         [Fact]
@@ -478,7 +411,7 @@ namespace CalcLib.Tests
         }
 
         /// <summary>
-        /// [ToPostfix] СПЕЦИФИЧЕСКИЙ СЛУЧАЙ: УНАРНЫЙ МИНУС
+        /// [ToPostfix] УНАРНЫЙ МИНУС
         /// Проверяет особую логику приоритета для унарного минуса (priority 5).
         /// Вход: -2^2 должен обрабатываться с учетом высокого приоритета u-.
         /// </summary>
@@ -496,7 +429,7 @@ namespace CalcLib.Tests
         }
 
         /// <summary>
-        /// [ToPostfix] НЕКОРРЕКТНЫЕ ВХОДНЫЕ ДАННЫЕ: ЗАПЯТАЯ ВНЕ ФУНКЦИИ
+        /// [ToPostfix] ЗАПЯТАЯ ВНЕ ФУНКЦИИ
         /// Проверяет генерацию ошибки SyntaxError при пустом стеке или отсутствии '(' для запятой.
         /// </summary>
         [Fact]
@@ -512,7 +445,7 @@ namespace CalcLib.Tests
         }
 
         /// <summary>
-        /// [ToPostfix] ГРАНИЧНЫЙ СЛУЧАЙ: НЕЗАКРЫТАЯ СКОБКА В КОНЦЕ
+        /// [ToPostfix] ГРАНИЧНЫЙ СЛУЧАЙ НЕЗАКРЫТАЯ СКОБКА В КОНЦЕ
         /// Покрывает проверку `if (op == "(")` в финальном цикле выгрузки стека.
         /// </summary>
         [Fact]
@@ -527,7 +460,7 @@ namespace CalcLib.Tests
         }
 
         /// <summary>
-        /// [ToPostfix] НЕКОРРЕКТНЫЕ ВХОДНЫЕ ДАННЫЕ: НЕИЗВЕСТНЫЙ ТОКЕН
+        /// [ToPostfix] НЕКОРРЕКТНЫЕ ВХОДНЫЕ ДАННЫЕ НЕИЗВЕСТНЫЙ ТОКЕН
         /// Проверяет финальный блок else, выбрасывающий исключение при неизвестном символе.
         /// </summary>
         [Fact]
@@ -544,7 +477,7 @@ namespace CalcLib.Tests
        
 
         /// <summary>
-        /// [Integration] ПОЛНАЯ ЦЕПОЧКА: СЛОЖНОЕ ВЫРАЖЕНИЕ С ФУНКЦИЯМИ
+        /// [Integration] ПОЛНАЯ ЦЕПОЧКА - СЛОЖНОЕ ВЫРАЖЕНИЕ С ФУНКЦИЯМИ
         /// Проверяет сквозную работу всех алгоритмов на выражении:
         /// "sin(0) + cos(0) * sqrt(16)" → 0 + 1 * 4 = 4.0
         /// </summary>
@@ -564,7 +497,7 @@ namespace CalcLib.Tests
         /// <summary>
         /// [Integration] РАБОТА С ПЕРЕМЕННЫМИ
         /// Проверяет подстановку значений переменных из словаря и регистронезависимость:
-        /// "2 * x + y" при x=3, y=4 → 10.0
+        /// "2 * x + y" при x=3, y=4 -> 10.0
         /// </summary>
         [Fact]
         [Trait("Algorithm", "Integration")]
@@ -582,7 +515,7 @@ namespace CalcLib.Tests
 
         /// <summary>
         /// Проверка корректности вычисления стандартных математических функций.
-        /// Покрывает основные ветки (arms) оператора switch для валидных входных данных.
+        /// Покрывает основные ветки оператора switch для валидных входных данных.
         /// </summary>
         [Theory]
         [InlineData("sqrt", 9, 3)]
@@ -642,7 +575,7 @@ namespace CalcLib.Tests
         }
 
         /// <summary>
-        /// [Integration] ВАЛИДАЦИЯ СИНТАКСИСА: КОРРЕКТНОЕ ВЫРАЖЕНИЕ
+        /// [Integration] ВАЛИДАЦИЯ СИНТАКСИСА - КОРРЕКТНОЕ ВЫРАЖЕНИЕ
         /// Проверяет метод ValidateSyntax на валидном выражении.
         /// Ожидается: возврат true без выброса исключений.
         /// </summary>
@@ -659,7 +592,7 @@ namespace CalcLib.Tests
         }
 
         /// <summary>
-        /// [Integration] ВАЛИДАЦИЯ СИНТАКСИСА: ОШИБКА В ВЫРАЖЕНИИ
+        /// [Integration] ВАЛИДАЦИЯ СИНТАКСИСА - ОШИБКА В ВЫРАЖЕНИИ
         /// Проверяет, что ValidateSyntax возвращает false при незакрытой скобке.
         /// </summary>
         [Fact]
@@ -733,7 +666,7 @@ namespace CalcLib.Tests
       
 
         /// <summary>
-        /// [Evaluate] ТИПИЧНЫЕ ДАННЫЕ: РАБОТА С ПЕРЕМЕННЫМИ
+        /// [Evaluate] ТИПИЧНЫЕ ДАННЫЕ РАБОТА С ПЕРЕМЕННЫМИ
         /// Проверяет извлечение значений из словаря и независимость от регистра (Case-insensitivity).
         /// </summary>
         [Fact]
@@ -749,7 +682,7 @@ namespace CalcLib.Tests
         }
 
         /// <summary>
-        /// [Evaluate] НЕКОРРЕКТНЫЕ ДАННЫЕ: ПЕРЕМЕННАЯ НЕ НАЙДЕНА
+        /// [Evaluate] НЕКОРРЕКТНЫЕ ДАННЫЕ ПЕРЕМЕННАЯ НЕ НАЙДЕНА
         /// Покрывает ветку `throw CalcException.InvalidVariable(token)`.
         /// </summary>
         [Fact]
@@ -757,14 +690,14 @@ namespace CalcLib.Tests
         public void Evaluate_InvalidInput_MissingVariable_ThrowsException()
         {
             var postfix = new List<string> { "a", "b", "+" };
-            var variables = new Dictionary<string, double> { { "a", 1 } }; // 'b' отсутствует
+            var variables = new Dictionary<string, double> { { "a", 1 } }; 
 
             var ex = Assert.Throws<TargetInvocationException>(() => _evaluateMethod.Invoke(_engine, new object[] { postfix, variables }));
             Assert.IsType<CalcException>(ex.InnerException);
         }
 
         /// <summary>
-        /// [Evaluate] СПЕЦИФИЧЕСКИЙ СЛУЧАЙ: УНАРНЫЙ МИНУС
+        /// [Evaluate] УНАРНЫЙ МИНУС
         /// Проверяет ветку `token == "u-"` и корректность изменения знака числа в стеке.
         /// </summary>
         [Fact]
@@ -780,7 +713,7 @@ namespace CalcLib.Tests
         }
 
         /// <summary>
-        /// [Evaluate] ГРАНИЧНЫЙ СЛУЧАЙ: БЕСКОНЕЧНЫЙ РЕЗУЛЬТАТ
+        /// [Evaluate] ГРАНИЧНЫЙ СЛУЧАЙ БЕСКОНЕЧНЫЙ РЕЗУЛЬТАТ
         /// Покрывает ветку `if (double.IsInfinity(result))` после выполнения операции.
         /// Например, возведение очень большого числа в большую степень.
         /// </summary>
@@ -797,7 +730,7 @@ namespace CalcLib.Tests
         }
 
         /// <summary>
-        /// [Evaluate] НЕКОРРЕКТНЫЕ ДАННЫЕ: ЛИШНЕЕ ЧИСЛО В СТЕКЕ
+        /// [Evaluate] НЕКОРРЕКТНЫЕ ДАННЫЕ ЛИШНЕЕ ЧИСЛО В СТЕКЕ
         /// Покрывает финальную проверку `if (stack.Count != 1)`.
         /// Сценарий: "2 3" (числа есть, а оператора нет).
         /// </summary>
@@ -829,10 +762,8 @@ namespace CalcLib.Tests
         [Trait("Algorithm", "ExecuteOperation")]
         public void ExecuteOperation_BasicArithmetic_ReturnsCorrectValue(string op, double a, double b, double expected)
         {
-            // Act
             var result = (double)_executeOperationMethod.Invoke(_engine, new object[] { op, a, b });
 
-            // Assert
             Assert.Equal(expected, result, 10);
         }
 
@@ -845,11 +776,9 @@ namespace CalcLib.Tests
         [Trait("Algorithm", "ExecuteOperation")]
         public void ExecuteOperation_DivisionByZero_ThrowsException()
         {
-            // Arrange
             string op = "/";
             double a = 10, b = 0;
 
-            // Act & Assert
             var ex = Assert.Throws<TargetInvocationException>(() => _executeOperationMethod.Invoke(_engine, new object[] { op, a, b }));
             Assert.IsType<CalcException>(ex.InnerException);
         }
@@ -862,11 +791,9 @@ namespace CalcLib.Tests
         [Trait("Algorithm", "ExecuteOperation")]
         public void ExecuteOperation_RootOfNegative_ThrowsException()
         {
-            // Arrange
             string op = "√";
             double a = -4, b = 2;
 
-            // Act & Assert
             var ex = Assert.Throws<TargetInvocationException>(() => _executeOperationMethod.Invoke(_engine, new object[] { op, a, b }));
             Assert.IsType<CalcException>(ex.InnerException);
         }
@@ -879,10 +806,8 @@ namespace CalcLib.Tests
         [Trait("Algorithm", "ExecuteOperation")]
         public void ExecuteOperation_UnknownOperator_ThrowsException()
         {
-            // Arrange
-            string op = "%"; // Допустим, остаток от деления не реализован
+            string op = "%"; 
 
-            // Act & Assert
             var ex = Assert.Throws<TargetInvocationException>(() => _executeOperationMethod.Invoke(_engine, new object[] { op, 1, 1 }));
             Assert.IsType<CalcException>(ex.InnerException);
         }

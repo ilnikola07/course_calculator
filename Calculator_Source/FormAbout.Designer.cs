@@ -28,17 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormAbout));
             labelAbout = new Label();
             SuspendLayout();
             // 
             // labelAbout
             // 
             labelAbout.AutoSize = true;
-            labelAbout.Location = new Point(44, 47);
+            labelAbout.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            labelAbout.Location = new Point(12, 38);
             labelAbout.Name = "labelAbout";
-            labelAbout.Size = new Size(129, 15);
+            labelAbout.Size = new Size(493, 170);
             labelAbout.TabIndex = 0;
-            labelAbout.Text = "Это курсовая работа...";
+            labelAbout.Text = resources.GetString("labelAbout.Text");
+            labelAbout.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // FormAbout
             // 
@@ -46,6 +49,8 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(527, 277);
             Controls.Add(labelAbout);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
             Name = "FormAbout";
             Text = "О приложении";
             ResumeLayout(false);
