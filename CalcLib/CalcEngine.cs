@@ -66,7 +66,9 @@ namespace CalcLib
                 throw CalcException.SyntaxError("Пустое выражение");
 
             string cleanExpr = expr.Replace(" ", "").Replace(",", ".");// Удаляет пробелы, если вдруг есть в строке и заменяет запятую на точку
-
+                        
+            if (Regex.IsMatch(cleanExpr, @"\.\.")) // Проверка на 2 точки подряд
+                throw CalcException.SyntaxError("Две или более точек подряд");
 
             var pattern = @"(?<number>\d+(?:\.\d+)?)|" +  
             @"(?<variable>[a-zA-Zа-яА-ЯёЁ][a-zA-Zа-яА-ЯёЁ0-9_]*)|" +
@@ -101,8 +103,8 @@ namespace CalcLib
 
                 if (token == "-") // Унарный минус если:
                 {
-                    bool isUnary = i == 0 || // В начале выражения
-                    result.Count == 0 || // После другого оператора
+                    bool isUnary = i == 0 || 
+                    result.Count == 0 || // В начале выражения
                     IsOperator(result.Last()) || // Стоит сразу после другого оператора
                     result.Last() == "("; // После открывающей скобки
 
@@ -270,8 +272,8 @@ namespace CalcLib
                     if (stack.Count < 2)
                         throw CalcException.StackUnderflow(token);
 
-                    double b = stack.Pop(); // Берем ВТОРОЕ число (правое)
-                    double a = stack.Pop(); // Берем ПЕРВОЕ число (левое)
+                    double b = stack.Pop(); // ВТОРОЕ число (правое)
+                    double a = stack.Pop(); // ПЕРВОЕ число (левое)
                     double result = ExecuteOperation(token, a, b); // Рассчитываем
 
                     if (double.IsNaN(result))
