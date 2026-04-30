@@ -126,7 +126,7 @@
             btnCom.Name = "btnCom";
             btnCom.Size = new Size(38, 32);
             btnCom.TabIndex = 20;
-            btnCom.Text = ",";
+            btnCom.Text = ".";
             btnCom.UseVisualStyleBackColor = true;
             btnCom.Click += BtnDigit_Click;
             // 

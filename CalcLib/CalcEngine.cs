@@ -8,7 +8,7 @@ namespace CalcLib
 {
     public class CalcEngine
     {
-        private static readonly CultureInfo _culture = CultureInfo.InvariantCulture; // Использовать точку как разделитель в числах
+        private readonly CultureInfo _culture = CultureInfo.InvariantCulture; // Использовать точку как разделитель в числах
         private int GetPriority(string op) // Выдача приоритета операциям
         {
             switch (op)
@@ -36,25 +36,26 @@ namespace CalcLib
         private bool IsFunction(string token)
         {
             var functions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) // С игнорированием регистра
-            {
-                "sin", "cos", "tan", "tg", "abs", "log", "ln", "sqrt", "√" // Коллекция (множество) разрешенных функций
-            };
+{
+"sin", "cos", "tan", "tg", "abs", "log", "ln", "sqrt", "√" // Коллекция (множество) разрешенных функций
+};
             return functions.Contains(token);
         }
 
         /// <summary>
-        /// Является ли переменной 
+        /// Является ли переменной
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
         private bool IsVariable(string token)
         {
-            return !double.TryParse(token, _culture, out _) &&
-                   !"+-*/^(),".Contains(token) &&
-                   !IsFunction(token) &&
-                   !string.IsNullOrWhiteSpace(token) &&
-                   Regex.IsMatch(token, @"^[a-zA-Zа-яА-ЯёЁ][a-zA-Zа-яА-ЯёЁ0-9_]*$");
+            return !double.TryParse(token, CultureInfo.InvariantCulture, out _) &&
+            !"+-*/^()".Contains(token) &&
+            !IsFunction(token) &&
+            !string.IsNullOrWhiteSpace(token) &&
+            Regex.IsMatch(token, @"^[a-zA-Zа-яА-ЯёЁ][a-zA-Zа-яА-ЯёЁ0-9_]*$");
         }
+
 
         /// <summary>
         /// Разбивает выражение на токены (числа, операторы, функции, скобки)
@@ -64,13 +65,14 @@ namespace CalcLib
             if (string.IsNullOrWhiteSpace(expr)) // Если вдруг ничего нет
                 throw CalcException.SyntaxError("Пустое выражение");
 
-            string cleanExpr = expr.Replace(" ", ""); // Удаляет пробелы, если вдруг есть в строке
+            string cleanExpr = expr.Replace(" ", "").Replace(",", ".");// Удаляет пробелы, если вдруг есть в строке и заменяет запятую на точку
 
-            var pattern = @"(?<number>\d+[.,]?\d*|[.,]\d+)|" + // Текущие паттерны, этот для цифр
-                         @"(?<variable>[a-zA-Zа-яА-ЯёЁ][a-zA-Zа-яА-ЯёЁ0-9_]*)|" + // Для функций
-                         @"(?<operator>\+\+|--|\+|-|\*|/|\^|√)|" + // Для операторов
-                         @"(?<paren>[()])|" + // Для скобок
-                         @"(?<comma>,)"; // Для запятой
+
+            var pattern = @"(?<number>\d+(?:\.\d+)?)|" +  
+            @"(?<variable>[a-zA-Zа-яА-ЯёЁ][a-zA-Zа-яА-ЯёЁ0-9_]*)|" +
+            @"(?<operator>\+\+|\-\-|\+|\-|\*|\/|\^|√)|" +
+            @"(?<paren>[()])";
+
 
             var matches = Regex.Matches(cleanExpr, pattern); // Просматривает всю строку и находит все, что подошли под правила выше
             var tokens = new List<string>();
@@ -81,7 +83,7 @@ namespace CalcLib
                 if (!string.IsNullOrWhiteSpace(val))
                     tokens.Add(val);
             }
-            
+
             tokens = ProcessUnaryMinus(tokens); // Обработка унарного минуса (замена "-" на "u-")
             return tokens;
         }
@@ -98,7 +100,7 @@ namespace CalcLib
                 string token = tokens[i];
 
                 if (token == "-") // Унарный минус если:
-                {                  
+                {
                     bool isUnary = i == 0 || // В начале выражения
                     result.Count == 0 || // После другого оператора
                     IsOperator(result.Last()) || // Стоит сразу после другого оператора
@@ -122,7 +124,7 @@ namespace CalcLib
         /// <returns></returns>
         private bool IsOperator(string token)
         {
-            return token is "+" or "-" or "*" or "/" or "^" or "u-"; 
+            return token is "+" or "-" or "*" or "/" or "^" or "u-";
         }
 
         /// <summary>
@@ -133,9 +135,9 @@ namespace CalcLib
             for (int i = 0; i < tokens.Count - 1; i++) // Ошибка, если нет знака между токенами
             {
                 string current = tokens[i];
-                string next = tokens[i + 1];                
+                string next = tokens[i + 1];
                 if ((current == ")" || double.TryParse(current, _culture, out _) || IsVariable(current)) &&
-                    (next == "(" || IsFunction(next) || double.TryParse(next, _culture, out _) || IsVariable(next)))
+                (next == "(" || IsFunction(next) || double.TryParse(next, _culture, out _) || IsVariable(next)))
                 {
                     throw CalcException.SyntaxError("Пропущен оператор между выражениями");
                 }
@@ -147,33 +149,17 @@ namespace CalcLib
             {
                 if (string.IsNullOrWhiteSpace(token)) // Если вдруг ничего
                     continue;
-                                
+
                 if (double.TryParse(token, _culture, out _) || IsVariable(token)) // Числа и переменные — сразу в выход
                 {
                     output.Add(token);
                 }
-                
+
                 else if (IsFunction(token) || token == "(") // Функции и открывающая скобка — в стек
                 {
                     stack.Push(token);
                 }
-                
-                else if (token == ",") // Запятая — разделитель аргументов 
-                {                    
-                    while (stack.Count > 0 && stack.Peek() != "(") // Выгружаем всё до ближайшей "("
-                    {
-                        string top = stack.Pop();
-                        if (top == "(")
-                        {
-                            stack.Push(top);
-                            break;
-                        }
-                        output.Add(top);
-                    }
-                    if (stack.Count == 0)
-                        throw CalcException.SyntaxError("Запятая вне функции");
-                }
-                
+
                 else if (token == ")") // Закрывающая скобка
                 {
                     bool foundOpen = false;
@@ -189,12 +175,12 @@ namespace CalcLib
                     }
                     if (!foundOpen)
                         throw CalcException.UnbalancedParentheses(); // Иначе ошибка несбалансированные скобки
-                                       
+
                     if (stack.Count > 0 && IsFunction(stack.Peek())) // Если перед скобкой была функция — выгружаем её
                         output.Add(stack.Pop());
-                }                
-                else if (IsOperator(token) || token == "√") // Операторы
-                {                    
+                }
+                else if (IsOperator(token)) // Операторы
+                {
                     int tokenPriority = token == "u-" ? 5 : GetPriority(token); // Для унарного минуса — особый приоритет
 
                     while (stack.Count > 0 && stack.Peek() != "(")
@@ -213,7 +199,7 @@ namespace CalcLib
                 {
                     throw CalcException.SyntaxError($"Неизвестный токен: '{token}'");
                 }
-            }            
+            }
             while (stack.Count > 0) // Выгружаем остаток стека
             {
                 string op = stack.Pop();
@@ -237,7 +223,7 @@ namespace CalcLib
             var normalizedVars = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase); // Нужно, чтобы X и x работали одинаково
 
             if (variables != null) // Передан ли вообще какой-нибудь словарь с переменными
-            { 
+            {
                 foreach (var kvp in variables)
                     normalizedVars[kvp.Key.ToLower()] = kvp.Value; // Это пара Имя переменной — Её значение
             }
@@ -249,7 +235,7 @@ namespace CalcLib
                 if (double.TryParse(token, _culture, out double number)) // Число - переводим в double и в вершину стека
                 {
                     stack.Push(number);
-                }                
+                }
                 else if (IsVariable(token))// Переменная - найти значение в словаре, иначе - ошибка
                 {
                     string key = token.ToLower();
@@ -257,20 +243,20 @@ namespace CalcLib
                         stack.Push(value);
                     else
                         throw CalcException.InvalidVariable(token);
-                }                
+                }
                 else if (token == "u-") // Унарный минус
                 {
                     if (stack.Count < 1)
                         throw CalcException.StackUnderflow("унарный минус");
                     stack.Push(-stack.Pop());
-                }                
+                }
                 else if (IsFunction(token)) // Функция
                 {
                     if (stack.Count < 1)
                         throw CalcException.SyntaxError($"Недостаточно аргументов для функции '{token}'");
 
                     double arg = stack.Pop(); // Берем одно число (аргумент)
-                    double result = ApplyFunction(token, arg);  // Считаем функцию
+                    double result = ApplyFunction(token, arg); // Считаем функцию
 
                     if (double.IsNaN(result)) // Возможны математические ошибки
                         throw CalcException.MathDomainError(token, arg);
@@ -278,15 +264,15 @@ namespace CalcLib
                         throw new CalcException($"Бесконечный результат функции {token}", CalcErrorCode.ResultInfinity);
 
                     stack.Push(result);
-                }                
-                else if ("+-*/^√".Contains(token)) // Остальные операторы
+                }
+                else if ("+-*/^".Contains(token)) // Остальные операторы
                 {
                     if (stack.Count < 2)
                         throw CalcException.StackUnderflow(token);
 
                     double b = stack.Pop(); // Берем ВТОРОЕ число (правое)
                     double a = stack.Pop(); // Берем ПЕРВОЕ число (левое)
-                    double result = ExecuteOperation(token, a, b);  // Рассчитываем
+                    double result = ExecuteOperation(token, a, b); // Рассчитываем
 
                     if (double.IsNaN(result))
                         throw CalcException.MathDomainError("операция", result);
@@ -313,14 +299,14 @@ namespace CalcLib
         /// <param name="func"></param>
         /// <param name="a"></param>
         /// <returns></returns>
-        public double ApplyFunction(string func, double a) 
+        public double ApplyFunction(string func, double a)
         {
             return func.ToLower() // func.ToLower() переводит, чтобы считалось вне зависимости от регистра
-                switch
+            switch
             {
                 "sqrt" or "√" => a < 0
-                    ? throw CalcException.MathDomainError("квадратного корня", a)
-                    : Math.Sqrt(a),
+                ? throw CalcException.MathDomainError("квадратного корня", a)
+                : Math.Sqrt(a),
 
                 "sin" => Math.Sin(a),
                 "cos" => Math.Cos(a),
@@ -328,12 +314,12 @@ namespace CalcLib
                 "abs" => Math.Abs(a),
 
                 "ln" => a <= 0
-                    ? throw CalcException.MathDomainError("натурального логарифма", a)
-                    : Math.Log(a, Math.E),
+                ? throw CalcException.MathDomainError("натурального логарифма", a)
+                : Math.Log(a, Math.E),
 
                 "log" => a <= 0
-                    ? throw CalcException.MathDomainError("десятичного логарифма", a)
-                    : Math.Log10(a),
+                ? throw CalcException.MathDomainError("десятичного логарифма", a)
+                : Math.Log10(a),
 
                 _ => throw CalcException.InvalidFunction(func)
             };
@@ -355,12 +341,9 @@ namespace CalcLib
                 "-" => a - b,
                 "*" => a * b,
                 "/" => b == 0
-                    ? throw CalcException.DivisionByZero()
-                    : a / b,
+                ? throw CalcException.DivisionByZero()
+                : a / b,
                 "^" => Math.Pow(a, b),
-                "√" => a < 0
-                    ? throw CalcException.MathDomainError("корня", a)
-                    : Math.Pow(a, 1.0 / b),
                 _ => throw new CalcException($"Неизвестный оператор: {op}", CalcErrorCode.InvalidOperator)
             };
         }
